@@ -26,29 +26,29 @@ fn main() {
         fh.read_to_string(&mut content);
         let split = content.split("\n");
 
-        // Get ourselves some elves
+        // Get ourselves a place to keep the elves
         let mut elves = Vec::new();
         elves.push(0); // Assume there is always one, carrying nothing to begin with
         let mut highest_calorie_index = 0; // Assume the first elf is in the lead
 
-        // Go through all lines in the file
-        // If there are calories, add that to the current elf being
-        // assessed.
+        // Go through all lines in the file.
+        // If there is calorie data, add that to the current
+        // elf being assessed, otherwise add a new elf with
+        // zero calorie count. 
         for s in split {
+            // Is there data?
             if s.len() > 0 {
+                // Parse and add to the current elf
                 let calories = s.parse::<i64>().unwrap();
-
-
-
                 let last_elf = elves.len()-1;
                 elves[last_elf] += calories;
+
+                // If this is the high-score, keep track
                 if elves[last_elf] > elves[highest_calorie_index] {
                     highest_calorie_index = elves.len()-1;
                 }                
-                // Add to the existing elf
             } else {
-                // new elf
-                elves.push(0);
+                elves.push(0); // New elf with zero calories to start with
             }
         }
 
