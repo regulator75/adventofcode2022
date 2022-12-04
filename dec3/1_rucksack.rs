@@ -8,8 +8,7 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
-//fn load_file_to_line_vector<'a>(filename: &String) -> std::str::Split<'a, char>{ // return-type figured out by compiler
-fn load_file_to_line_vector<'a>(filename: &String, data: &'a mut String) -> std::str::Split<'a, char>{ // return-type figured out by compiler
+fn load_file_to_line_vector<'a>(filename: &String, data: &'a mut String) -> std::str::Split<'a, char>{
         // Let the file be mutable, because we will
         // do things that changes the state, i assume
         let mut fh = match File::open(filename) {
@@ -50,9 +49,6 @@ fn main() {
 
         let collection = load_file_to_line_vector(filename,&mut file_content);
 
-        // Get ourselves some elves
-        let mut elves = Vec::new();
-        elves.push(0); // Assume there is always one, carrying nothing to begin with
         let mut score = 0;
         for s in collection {
             if s.len() > 0 {
