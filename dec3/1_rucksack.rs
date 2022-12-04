@@ -60,13 +60,10 @@ fn main() {
                     panic!("Invalid input, odd number of items");
                 }
                 let (leftcompartment,rightcompartment) = s.split_at(s.len()/2);
-                println!("Left, right: {}, {}", leftcompartment, rightcompartment);
                 for cl in leftcompartment.chars() {
                     if rightcompartment.contains(cl) {
-                        // Double packed! Lets call this out
-                        println!("Found a double packed item: {}, scores as {}", cl, score_item(cl));
                         score += score_item(cl);
-                        break;
+                        break; // Only count double packed items once.
                     }
                 }
             }
