@@ -1,5 +1,5 @@
 //
-// Advent of code 2022 Dec-4, part 1
+// Advent of code 2022 Dec-4, part 1 and 2
 //
 
 // Reader beware, this is me learning rust.
