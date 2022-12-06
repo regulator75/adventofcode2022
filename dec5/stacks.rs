@@ -41,11 +41,24 @@ fn prepare_for_parsing<'a>(file_content_goes_here: &'a mut String)-> std::str::S
 
 fn main() {
     let mut file_content = String::new();
-    let file_content_per_line = prepare_for_parsing( &mut file_content ); 
+    let mut file_content_per_line = prepare_for_parsing( &mut file_content ); 
 
     // Build a vector of vectors. I.e. a vector of the stacks.
     //
     let mut stacks : Vec<Vec<char>> = Vec::<Vec<char>>::new();
+
+
+    //
+    // Two parts below
+    // 
+    // Part one, load the stack data
+    // Part two, process the move instructions
+    // 
+    // Both use the same iterator, handed over.
+    // The first part "break" conveniently
+    // letting the move-part continue until the
+    // end of file.
+
 
     //
     // First part, load the stack data
@@ -58,12 +71,10 @@ fn main() {
     //  1   2   3 
     //
 
-    let mut sitenum = file_content_per_line.enumerate();
-
-    let mut sit = sitenum.next();
+    let mut sit = file_content_per_line.next();
+ 
     while sit != None {
-        let s = sit.unwrap().1;
-    //for s in file_content_per_line {
+        let s = sit.unwrap();
         if s.len() == 0 {
             break;
         }
@@ -93,12 +104,14 @@ fn main() {
             //println!("Looping, character is {}", nextchar);
 
             if nextchar == '[' { // There is something in this stack. Extract it
-                
+             
+                // Read the actual content of the box
                 let data = charit.next().unwrap();
-                let closebracket = charit.next().unwrap();
-                if closebracket != ']' {
-                    panic!("Parsing error! Read{} where there should be a '['", closebracket);
-                }
+
+                // Discard the closing bracket
+                charit.next();
+
+                // Check to make sure we have enough stack-data.
                 while stacks.len() < stackindex+1 {
                     // Yet another stack, lets create space for it.
                     stacks.push(vec![]);
@@ -107,7 +120,7 @@ fn main() {
     
                 // Final step, store the information
                 println!("Pushing {} onto stack {}", data,stackindex);
-                stacks[stackindex].push(data);
+                stacks[stackindex].insert(0,data);
                 stackindex+=1;
 
                 // Now, we need to leave the iterator at a 
@@ -121,27 +134,72 @@ fn main() {
                     nextchar_container = charit.next();
                 }
 
-            } else if nextchar == ' ' { // Emty slot, just read three spaces
-                println!("No data for stack {}", stackindex);
+            } else if nextchar == ' ' { // Emty slot, or the "axis maker", just read three characteres
                 // rustc bug? If I use charit.skip(3) here instead
                 // I get a compiler error on the statement 
                 //     let data = charit.next().unwrap();
                 // above.
-                charit.next();
-                charit.next();
+                charit.next(); // This could possibly be a digit indicating the stack index, if its the "axis marker"
+                charit.next(); 
                 charit.next();
                 stackindex+=1;
                 nextchar_container = charit.next();
             }   
         }
-        sit = sitenum.next();
+        sit = file_content_per_line.next();
     }
 
-    for st in stacks {
+    for st in &stacks {
         print!("Stack ");
         for ch in st {
             print!("{}", ch);
         }
         println!("\n");
     }
+
+
+
+    //
+    //
+    // Part two the moving
+    //
+
+    sit = file_content_per_line.next();
+    while sit != None {
+        let s = sit.unwrap();
+        
+        // Read the instructions 
+        // They look like this:
+        // move 1 from 2 to 1
+        let instructions : Vec<&str> = s.split(' ').collect();
+        let count = instructions[1].parse::<usize>().unwrap();
+        let from  = instructions[3].parse::<usize>().unwrap()-1;
+        let to    = instructions[5].parse::<usize>().unwrap()-1;
+
+        for n in 0..count{
+            println!("Moving from {} to {} (iteration {})",from+1, to+1, n);
+            let val = stacks[from].pop();
+            stacks[to].push(val.unwrap());
+//            let mut target = &stacks[to];
+//            let mut source = &stacks[from];
+//            target.push(source.pop().unwrap());
+
+        }        
+
+        sit = file_content_per_line.next();
+    }
+
+    for st in &stacks {
+        print!("Stack after move ");
+        for ch in st {
+            print!("{}", ch);
+        }
+        print!("\n");
+    }
+
+    for st in &stacks {
+        print!("{}",st[st.len()-1]);
+    }
+    println!("");
+
 } 
