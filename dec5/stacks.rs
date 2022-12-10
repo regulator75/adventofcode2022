@@ -29,25 +29,28 @@ fn load_file_to_line_vector<'a>(filename: &String, data: &'a mut String) -> std:
         return data.split('\n');
 }
 
-fn prepare_for_parsing<'a>(file_content_goes_here: &'a mut String, protocol_goes_here: &'a mut i64)-> std::str::Split<'a, char> {
+fn prepare_for_parsing<'a>(file_content_goes_here: &'a mut String)-> (std::str::Split<'a, char>, i64) {
     let args:Vec<String> = env::args().collect();
     if args.len() != 3  {
         panic!("Usage: {} [CraneMover9000 | CraneMover9001] <input_filename>\n", args[0]);
     } else {
-        *protocol_goes_here = match args[1].to_string().as_str() {
+        let protocol_goes_here = match args[1].to_string().as_str() {
             "CraneMover9000" => 1,
             "CraneMover9001" => 2,
             &_ => panic!("Invalid crane protocol '{}' specified. Please specify CraneMover9000 or CraneMover9001", args[1])
         };
         let filename = &args[2].to_string();
-        return load_file_to_line_vector(filename,file_content_goes_here);
+        return (load_file_to_line_vector(filename,file_content_goes_here), protocol_goes_here) ;
     }
 }
 
 fn main() {
     let mut file_content = String::new();
-    let mut crane_protocol = 0;
-    let mut file_content_per_line = prepare_for_parsing( &mut file_content , &mut crane_protocol); 
+    //let mut crane_protocol = 0;
+    //let mut file_content_per_line;
+    let result = prepare_for_parsing( &mut file_content); 
+    let mut file_content_per_line = result.0;
+    let crane_protocol=result.1;
 
     // Build a vector of vectors. I.e. a vector of the stacks.
     //
@@ -182,15 +185,24 @@ fn main() {
         let from  = instructions[3].parse::<usize>().unwrap()-1;
         let to    = instructions[5].parse::<usize>().unwrap()-1;
 
-        for n in 0..count{
-            println!("Moving from {} to {} (iteration {})",from+1, to+1, n);
-            let val = stacks[from].pop();
-            stacks[to].push(val.unwrap());
-//            let mut target = &stacks[to];
-//            let mut source = &stacks[from];
-//            target.push(source.pop().unwrap());
+        if crane_protocol == 1 {
+            // CraneMover9000, one box at a time
+            for n in 0..count{
+                println!("Moving from {} to {} (iteration {})",from+1, to+1, n);
+                let val = stacks[from].pop();
+                stacks[to].push(val.unwrap());
+            }  
+        } else {
+            // CraneMover9001, many boxes at a time
+            println!("Moving {} boxes from {} to {} ",count, from+1, to+1);
+            let last_to_take = stacks[from].len()-count;
+            let mut u: Vec<_> = stacks[from].drain(last_to_take..).collect();
 
-        }        
+            stacks[to].append(&mut u);
+
+
+        }
+
 
         sit = file_content_per_line.next();
     }
