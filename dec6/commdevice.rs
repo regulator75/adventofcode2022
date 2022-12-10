@@ -45,25 +45,23 @@ fn process_character(buffer : &mut String, marker_length : usize, latest : char)
     return buffer.len() == marker_length;
 }
 
+fn find_marker(file_content : &String, marker_length: usize) -> usize {
+    let mut marker_window: String = String::new();
+
+    for (idx, c) in file_content.chars().enumerate() { 
+        if process_character(&mut marker_window, marker_length, c) {
+            return idx+1;
+        }
+    }    
+    return 0;
+}
+
 fn main() {
     let mut file_content = String::new();
     let args:Vec<String> = env::args().collect();
     load_file(&args[1], &mut file_content);
-    let mut packet_marker_buffer: String = String::new();
 
-    for (idx, c) in file_content.chars().enumerate() { 
-        if process_character(&mut packet_marker_buffer, START_OF_PACKAGE_MARKER_LENGTH, c) {
-            println!("start-of-packet marker {}", idx+1);
-            break; // Do not continue
-        }
-    }
-
-    let mut message_marker_buffer: String = String::new();
-    for (idx, c) in file_content.chars().enumerate() { 
-        if process_character(&mut message_marker_buffer, START_OF_MESSAGE_MARKER_LENGTH, c) {
-            println!("start-of-message marker {}", idx+1);
-            break; // Do not continue
-        }
-    }
-
+    println!("start-of-packet marker {}",find_marker(&file_content,START_OF_PACKAGE_MARKER_LENGTH));
+    println!("start-of-message marker {}",find_marker(&file_content,START_OF_MESSAGE_MARKER_LENGTH));
+           
 } 
