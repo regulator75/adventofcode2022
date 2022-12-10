@@ -8,7 +8,7 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
-const MARKER_LENGTH: usize = 4;
+const START_OF_PACKAGE_MARKER_LENGTH: usize = 4;
 
 
 //
@@ -31,7 +31,7 @@ fn load_file<'a>(filename: &String, data: &'a mut String){
 }
 
 // return strue if this is a start-of-buffer marker
-fn process_character(buffer : &mut String, latest : char) -> bool {
+fn process_character(buffer : &mut String, marker_length : usize, latest : char) -> bool {
 
     // Remove character from buffer until all elements
     // would be unique after 'latest' is added
@@ -41,7 +41,7 @@ fn process_character(buffer : &mut String, latest : char) -> bool {
 
     buffer.insert(0,latest);
 
-    return buffer.len() == MARKER_LENGTH;
+    return buffer.len() == marker_length;
 }
 
 fn main() {
@@ -51,7 +51,7 @@ fn main() {
     let mut marker_buffer: String = String::new();
 
     for (idx, c) in file_content.chars().enumerate() { 
-        if process_character(&mut marker_buffer, c) {
+        if process_character(&mut marker_buffer, START_OF_PACKAGE_MARKER_LENGTH, c) {
             println!("Found marker, last index is {}", idx+1);
             break; // Do not continue
         }
