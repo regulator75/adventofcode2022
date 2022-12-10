@@ -9,6 +9,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 const START_OF_PACKAGE_MARKER_LENGTH: usize = 4;
+const START_OF_MESSAGE_MARKER_LENGTH: usize = 14;
 
 
 //
@@ -48,12 +49,21 @@ fn main() {
     let mut file_content = String::new();
     let args:Vec<String> = env::args().collect();
     load_file(&args[1], &mut file_content);
-    let mut marker_buffer: String = String::new();
+    let mut packet_marker_buffer: String = String::new();
 
     for (idx, c) in file_content.chars().enumerate() { 
-        if process_character(&mut marker_buffer, START_OF_PACKAGE_MARKER_LENGTH, c) {
-            println!("Found marker, last index is {}", idx+1);
+        if process_character(&mut packet_marker_buffer, START_OF_PACKAGE_MARKER_LENGTH, c) {
+            println!("start-of-packet marker {}", idx+1);
             break; // Do not continue
         }
     }
+
+    let mut message_marker_buffer: String = String::new();
+    for (idx, c) in file_content.chars().enumerate() { 
+        if process_character(&mut message_marker_buffer, START_OF_MESSAGE_MARKER_LENGTH, c) {
+            println!("start-of-message marker {}", idx+1);
+            break; // Do not continue
+        }
+    }
+
 } 
